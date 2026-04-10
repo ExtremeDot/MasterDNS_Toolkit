@@ -229,6 +229,8 @@ LISTEN_PORT = 55555
 SOCKS5_AUTH = true
 SOCKS5_USER = "ab1"
 SOCKS5_PASS = "ab2"
+```
+
 ---
 
 ### 🔹 همگام‌سازی تنظیمات
