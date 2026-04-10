@@ -444,6 +444,9 @@ Waiting for SOCKS5...
 
 ---
 
+---
+### توضیحات اضافی
+
 
 برای انکه بعد از خروج از ssh تست متوقف نشود میتوانیم از `tmux` استفاده کنیم
 
@@ -471,7 +474,7 @@ tmux attach -t speedtest
 
 ---
 
-## tmux چیست؟
+#### tmux چیست؟
 
 `tmux` یک ابزار مدیریت ترمینال (Terminal Multiplexer) است که به شما اجازه می‌دهد:
 
@@ -481,11 +484,11 @@ tmux attach -t speedtest
 
 ---
 
-## نصب tmux
+#### نصب tmux
 
 اگر `tmux` نصب نیست، با یکی از دستورات زیر آن را نصب کنید:
 
-### Ubuntu / Debian
+##### Ubuntu / Debian
 ```bash
 sudo apt install tmux -y
 ```
