@@ -1,7 +1,14 @@
 # 🚀 MasterDNS Toolkit
 
+<img width="498" height="481" alt="image" src="https://github.com/user-attachments/assets/b8858f8f-fb60-49c5-9aad-561d89b27641" />
+
+
 ابزاری برای استخراج، مرتب‌سازی و تست سرعت IPها در بستر **MasterDNS VPN** با قابلیت اتوماسیون کامل.
 
+
+ ابزار پیداکردن ریزالور واقعی با تست برای پروژه https://github.com/masterking32/MasterDnsVPN
+
+به پروزه ایشان بابت کارشون امتیاز بدید.
 ---
 
 ## 📌 معرفی
@@ -28,11 +35,30 @@ sudo apt install curl netcat bc
 
 ## 🛠 نصب و راه‌اندازی
 
+
+حتما فایل ها را درون یک فولدر مجزا قرار دهید
+
+```bash
+mkdir /root/MDNS
+```
+فایل های اجرایی کلاینت خود به همراه تنظیمات کلاینت بروز شده را در درون فولدر قرار دهید.
+فایل اجرایی MasterDNS را به BINMDV تغییر بدید که با فایل اجرایی قبلی خودتون قاتی نشه .
+
+برای مثال من فایل MasterDnsVPN_Client_Linux_AMD64_v2026.04.07.233605-b5a4474 رو تغییر نام دادم.
+```
+mv MasterDnsVPN_Client_Linux_AMD64_v2026.04.07.233605-b5a4474 BINMDV
+chmod +x BINMDV
+```
 ### 1. دانلود اسکریپت
 
 ```bash
-git clone https://github.com/your-repo/MasterDNS_Toolkit.git
-cd MasterDNS_Toolkit
+curl -O https://raw.githubusercontent.com/ExtremeDot/MasterDNS_Toolkit/main/MDNS_Toolkit.sh 
+chmod +x MDNS_Toolkit.sh
+```
+###### اگر دسترسی ندارید میتوانید از طریق پورت ساکس که خود برنامه اجرا کرده دانلود کنید، ای پی و پورت ، یوزرنیم و پسورد خودتون رو جایگزین کنید
+
+```bash
+curl --socks5 127.0.0.1:10800 --proxy-user user:pass  -O https://raw.githubusercontent.com/ExtremeDot/MasterDNS_Toolkit/main/MDNS_Toolkit.sh && chmod +x MDNS_Toolkit.sh 
 chmod +x MDNS_Toolkit.sh
 ```
 
@@ -68,7 +94,7 @@ EXECUTABLE="./MasterDnsVPN_Client_Linux_AMD64_v2026.03.12.145701-00150d5"
 
 ## 🚦 قبل از اجرا
 
-سرویس MasterDNS باید متوقف شود:
+در صورتی که از یک پورت یکسان برای تست و Master DNS VPN استفاده میکنید ، سرویس MasterDNS باید متوقف شود:
 
 ```bash
 sudo systemctl stop masterdnsvpn
@@ -127,6 +153,9 @@ output/speed_DATE.log
 
 ### 🔹 استخراج IP از لاگ‌ها
 
+به این صورت که از تمای لاگ های ساخته شده در اجرای های قبلی MasterDNS VPN ، آی پی های بدون تکرار را استخراج میکند و درون فایل sorted_ip.txt  قرار میدهد. 
+در انتها برنامه از همین sorted_ip.txt استفاده کرده و تست اتصال واقعی گرفته و خروجی ریزالورهای تست شده را در فولدر output ذخیره میکند که درانتها میتوانید از آن برای client_resolvers.txt استفاده کنید.
+
 ```bash
 ./MDNS_Toolkit.sh sa
 ```
@@ -134,6 +163,8 @@ output/speed_DATE.log
 ---
 
 ### 🔹 مرتب‌سازی IP از فایل
+
+برای زمانی هست که میخوایم فقط از یک فایل خاص آی پی ها رو استخراج کنیم، برای یک لاگ خاص خروجی از برنامه. 
 
 ```bash
 ./MDNS_Toolkit.sh s file.txt
@@ -143,12 +174,14 @@ output/speed_DATE.log
 
 ### 🔹 تست سرعت
 
+این دستور تمامی ریزالورها از فایل sorted_ip.txt رو دونه به دونه توی فایل client_resolvers.txt قرار میده و بصورت تکی ازشون تست واقعی سرعت میگیرهف در صورتی که یکی از 3 تا تست ها موفق باشه ، اون ریزالور رو توی خروجی speed_log توی فولدر output میفرسته.
+
 ```bash
 ./MDNS_Toolkit.sh st
 ```
 
 یا برای یک IP خاص:
-
+برای زمانی هست که نمیخواید از فایل sorted_ip.txt استفاده کنید، با وارد کردن ریزالور ابتدا به فایل resolver اضافه میکنه و بعد ازش تست میگیره.
 ```bash
 ./MDNS_Toolkit.sh st 1.2.3.4
 ```
@@ -156,6 +189,8 @@ output/speed_DATE.log
 ---
 
 ### 🔹 تبدیل فایل‌های txt به log
+
+برای زمانی هست که فایل هایی که ای پی های ریزالور ما درون txt هستند استفاده میکنه و تمامی فایل های درون فولدر رو بجز client_resolver.txt رو به پسوند log تغییر میده، این قابلیت کاربردی برای زمانی هست که میخوایم تمامی آی پی ریزالورهای درون لاگ ها رو درون فایل sorted_ip.txt انتقال بدیم.
 
 ```bash
 ./MDNS_Toolkit.sh conv
@@ -178,11 +213,27 @@ output/speed_DATE.log
 
 * از فایل بکاپ می‌گیرد
 * مقادیر بهینه را اعمال می‌کند
+تغییراتی که روی فایل config-client.toml اعمال میکند شامل موارد زیر می باشد:
 
+
+```
+SAVE_MTU_SERVERS_TO_FILE = false
+
+MIN_UPLOAD_MTU = 40
+MIN_DOWNLOAD_MTU = 500
+MAX_UPLOAD_MTU = 120
+MAX_DOWNLOAD_MTU = 900
+
+LISTEN_IP = "127.0.0.1"
+LISTEN_PORT = 55555
+SOCKS5_AUTH = true
+SOCKS5_USER = "ab1"
+SOCKS5_PASS = "ab2"
 ---
 
 ### 🔹 همگام‌سازی تنظیمات
 
+ 
 ```bash
 ./MDNS_Toolkit.sh sync
 ```
@@ -198,6 +249,8 @@ output/speed_DATE.log
 
 * فایل مرتب‌شده:
 
+تمامی آی پی ریزالورهای استخراج شده در فایل sorted_ip.txt انتقال داده میشوند.
+در زمان انجام تست، هر آی پی که تست گرفته میشود از این فایل حذف شده و اجرای تست تا زمانی که تمامی ای پی ریزالورها به اتمام برسند ادامه خواهد داشت.
 ```
 sorted_ip.txt
 ```
@@ -218,9 +271,10 @@ output/speed_YYYY-MM-DD_HH-MM-SS.log
 
 ## ⚠️ نکات مهم
 
-* قبل از اجرا، سرویس MasterDNS را متوقف کنید
+* حتما تست را در یک فولدر جداگانه انجام دهید.
+* فایل اجرایی MasterVPN را به BINMDV تغییر دهید.
 * فایل `client_config.toml` باید وجود داشته باشد
-* نام EXECUTABLE را حتماً اصلاح کنید
+* نام EXECUTABLE را حتماً اصلاح کنید ، باید مطابق نامی باشد که برای فایل اجرایی MasterDNs انتخاب میکنید.
 * در صورت اجرا روی سرور، دسترسی‌های لازم بررسی شود
 
 ---
