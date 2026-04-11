@@ -187,14 +187,12 @@ while true; do
         SPEED_KB=$(echo "scale=2; $SPEED/1024" | bc)
 
         echo "$(date) | $IP $RESULT1 $RESULT2 $RESULT3 - Speed: ${SPEED_KB} KB/s | Time: ${DURATION}s"  | tee -a "$DETAILED_LOG_FILE"
-        echo "$IP" | tee -a "$LOG_FILE"
+        echo "$IP" >> "$LOG_FILE"
 
     else
         echo "$(date) | IP $IP skipped (all FAIL)" | tee -a "$DETAILED_LOG_FILE"
-        echo "$(date) | IP $IP skipped (all FAIL)"
     fi
 
-    # kill MDV (very important fix)
     kill $MDV_PID 2>/dev/null
     sleep 2
 
