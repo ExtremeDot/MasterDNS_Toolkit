@@ -46,8 +46,8 @@ mkdir /root/MDNS
 
 برای مثال من فایل MasterDnsVPN_Client_Linux_AMD64_v2026.04.07.233605-b5a4474 رو تغییر نام دادم.
 ```
-mv MasterDnsVPN_Client_Linux_AMD64_v2026.04.07.233605-b5a4474 BINMDV
-chmod +x BINMDV
+mv MasterDnsVPN_Client_Linux_AMD64_v2026.04.07.233605-b5a4474 MDV
+chmod +x MDV
 ```
 ### 1. دانلود اسکریپت
 
