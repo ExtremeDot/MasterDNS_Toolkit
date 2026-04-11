@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -u
-version="1.2"
+version="1.3"
 # ================= COLORS =================
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -39,6 +39,9 @@ EOF
 echo -e "${YELLOW}Sample config created: $CONFIG_FILE${NC}"
 fi
 
+OUTPUT_DIR="./output"
+TEMP_OUTPUT_DIR="./output/tmp"
+
 source "$CONFIG_FILE"
 mkdir -p "$OUTPUT_DIR"
 mkdir -p "$TEMP_OUTPUT_DIR"
@@ -54,7 +57,7 @@ index=$(printf "%03d" "$next_index")
 DATE=$(date +"%Y-%m-%d_%H-%M-%S")
 WORKING_LOG_FILE="$OUTPUT_DIR/${index}_Result.log"
 DETAILED_LOG_FILE="$OUTPUT_DIR/${index}_Detailed_Result.log"
-FAILED_LOG_FILE="$TEMP_OUTPUT_DIR/${index}_FAILED.log"
+FAILED_LOG_TEMP="$TEMP_OUTPUT_DIR/${index}_FAILED.log"
 FULL_DETAIL_WORKING_TEMP="$TEMP_OUTPUT_DIR/${index}_FULL_DETAIL_WORKING.log"
 
 # ================= SORT =================
@@ -122,6 +125,11 @@ sync_cfg() {
 }
 # ================= SPEED TEST =================
 speedtest_loop() {
+echo " Non-Working and Failed IP Resolvers  ------" > $FAILED_LOG_TEMP
+echo " Working IP Resolvers with test result detais ------" > $FULL_DETAIL_WORKING_TEMP
+echo "Test Result - $(date) " > $WORKING_LOG_FILE
+echo " Working IP Resolvers ------" >> $WORKING_LOG_FILE
+echo "" >> $WORKING_LOG_FILE
 
 while true; do
 
@@ -195,7 +203,8 @@ while true; do
         echo "$IP" >> "$WORKING_LOG_FILE"
 
     else
-        echo "$IP skipped (all FAIL)" | tee -a "$FAILED_LOG_TEMP"
+        echo "$IP skipped (all FAIL)"
+        echo "$IP " >> "$FAILED_LOG_TEMP"
     fi
 
     kill $MDV_PID 2>/dev/null
@@ -212,20 +221,18 @@ while true; do
 
 done
 
-echo "Test Result - $(date) " > $DETAILED_LOG_FILE
-echo " Working IP Resolvers ------" >> $DETAILED_LOG_FILE
+# creating Full details logfile
+cat $WORKING_LOG_FILE > $DETAILED_LOG_FILE
 echo "" >> $DETAILED_LOG_FILE
-cat $WORKING_LOG_FILE >> $DETAILED_LOG_FILE
-echo "" >> $DETAILED_LOG_FILE
-echo " Working IP Resolvers with test result detais ------" >> $DETAILED_LOG_FILE
 cat $FULL_DETAIL_WORKING_TEMP >> $DETAILED_LOG_FILE
 echo "" >> $DETAILED_LOG_FILE
-echo " Non-Working and Failed IP Resolvers  ------" >> $DETAILED_LOG_FILE
 cat $FAILED_LOG_TEMP >> $DETAILED_LOG_FILE
 echo " FINISH LINE -------------------------------" >> $DETAILED_LOG_FILE
+
 sleep 1
 rm $FAILED_LOG_TEMP
 rm $FULL_DETAIL_WORKING_TEMP
+
 }
 
 
