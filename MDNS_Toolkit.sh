@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -u
-version="1.1"
+version="1.2"
 # ================= COLORS =================
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -25,6 +25,7 @@ CONFIG_FILE="./MasterDNS_tool.cfg"
 if [[ ! -f "$CONFIG_FILE" ]]; then
 cat <<EOF > "$CONFIG_FILE"
 OUTPUT_DIR="./output"
+TEMP_OUTPUT_DIR="./output/tmp"
 RESOLV_FILE="sorted_ip.txt"
 CLIENT_FILE="client_resolvers.txt"
 EXECUTABLE="./MDV"
@@ -40,6 +41,7 @@ fi
 
 source "$CONFIG_FILE"
 mkdir -p "$OUTPUT_DIR"
+mkdir -p "$TEMP_OUTPUT_DIR"
 last_index=$(ls "$OUTPUT_DIR" 2>/dev/null | grep -E '^[0-9]+_' | sed 's/_.*//' | sort -n | tail -1)
 
 if [ -z "$last_index" ]; then
@@ -50,8 +52,11 @@ fi
 
 index=$(printf "%03d" "$next_index")
 DATE=$(date +"%Y-%m-%d_%H-%M-%S")
-LOG_FILE="$OUTPUT_DIR/${index}_Result_$DATE.log"
-DETAILED_LOG_FILE="$OUTPUT_DIR/${index}_Detailed_Result_$DATE.log"
+WORKING_LOG_FILE="$OUTPUT_DIR/${index}_Result.log"
+DETAILED_LOG_FILE="$OUTPUT_DIR/${index}_Detailed_Result.log"
+FAILED_LOG_FILE="$TEMP_OUTPUT_DIR/${index}_FAILED.log"
+FULL_DETAIL_WORKING_TEMP="$TEMP_OUTPUT_DIR/${index}_FULL_DETAIL_WORKING.log"
+
 # ================= SORT =================
 sort_ips() {
   grep -Eho '([0-9]{1,3}\.){3}[0-9]{1,3}' "$@" \
@@ -186,11 +191,11 @@ while true; do
         DURATION=$(echo "scale=2; ($END - $START)/1000000000" | bc)
         SPEED_KB=$(echo "scale=2; $SPEED/1024" | bc)
 
-        echo "$(date) | $IP $RESULT1 $RESULT2 $RESULT3 - Speed: ${SPEED_KB} KB/s | Time: ${DURATION}s"  | tee -a "$DETAILED_LOG_FILE"
-        echo "$IP" >> "$LOG_FILE"
+        echo "$IP | $RESULT1 | $RESULT2 | $RESULT3 | Speed: ${SPEED_KB} KB/s | Time: ${DURATION}s"  | tee -a "$FULL_DETAIL_WORKING_TEMP"
+        echo "$IP" >> "$WORKING_LOG_FILE"
 
     else
-        echo "$(date) | IP $IP skipped (all FAIL)" | tee -a "$DETAILED_LOG_FILE"
+        echo "$IP skipped (all FAIL)" | tee -a "$FAILED_LOG_TEMP"
     fi
 
     kill $MDV_PID 2>/dev/null
@@ -206,6 +211,21 @@ while true; do
     sleep 1
 
 done
+
+echo "Test Result - $(date) " > $DETAILED_LOG_FILE
+echo " Working IP Resolvers ------" >> $DETAILED_LOG_FILE
+echo "" >> $DETAILED_LOG_FILE
+cat $WORKING_LOG_FILE >> $DETAILED_LOG_FILE
+echo "" >> $DETAILED_LOG_FILE
+echo " Working IP Resolvers with test result detais ------" >> $DETAILED_LOG_FILE
+cat $FULL_DETAIL_WORKING_TEMP >> $DETAILED_LOG_FILE
+echo "" >> $DETAILED_LOG_FILE
+echo " Non-Working and Failed IP Resolvers  ------" >> $DETAILED_LOG_FILE
+cat $FAILED_LOG_TEMP >> $DETAILED_LOG_FILE
+echo " FINISH LINE -------------------------------" >> $DETAILED_LOG_FILE
+sleep 1
+rm $FAILED_LOG_TEMP
+rm $FULL_DETAIL_WORKING_TEMP
 }
 
 
