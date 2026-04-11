@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -u
-
+version="1.1"
 # ================= COLORS =================
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -17,7 +17,7 @@ echo "██╔████╔██║██║  ██║██╔██╗ �
 echo "██║╚██╔╝██║██║  ██║██║╚██╗██║╚════██║"
 echo "██║ ╚═╝ ██║██████╔╝██║ ╚████║███████║"
 echo "╚═╝     ╚═╝╚═════╝ ╚═╝  ╚═══╝╚══════╝"
-echo -e "${GREEN}MasterDNS Toolkit${NC}\n"
+echo -e "${GREEN}MasterDNS Toolkit         ${YELLOW}Version ${version} ${NC}"
 
 CONFIG_FILE="./MasterDNS_tool.cfg"
 
@@ -40,10 +40,18 @@ fi
 
 source "$CONFIG_FILE"
 mkdir -p "$OUTPUT_DIR"
+last_index=$(ls "$OUTPUT_DIR" 2>/dev/null | grep -E '^[0-9]+_' | sed 's/_.*//' | sort -n | tail -1)
 
+if [ -z "$last_index" ]; then
+    next_index=1
+else
+    next_index=$((last_index + 1))
+fi
+
+index=$(printf "%03d" "$next_index")
 DATE=$(date +"%Y-%m-%d_%H-%M-%S")
-LOG_FILE="$OUTPUT_DIR/speed_$DATE.log"
-
+LOG_FILE="$OUTPUT_DIR/${index}_Result_$DATE.log"
+DETAILED_LOG_FILE="$OUTPUT_DIR/${index}_Detailed_Result_$DATE.log"
 # ================= SORT =================
 sort_ips() {
   grep -Eho '([0-9]{1,3}\.){3}[0-9]{1,3}' "$@" \
@@ -178,10 +186,12 @@ while true; do
         DURATION=$(echo "scale=2; ($END - $START)/1000000000" | bc)
         SPEED_KB=$(echo "scale=2; $SPEED/1024" | bc)
 
-        echo "$(date) | $IP $RESULT1 $RESULT2 $RESULT3 - Speed: ${SPEED_KB} KB/s | Time: ${DURATION}s" | tee -a "$LOG_FILE"
+        echo "$(date) | $IP $RESULT1 $RESULT2 $RESULT3 - Speed: ${SPEED_KB} KB/s | Time: ${DURATION}s"  | tee -a "$DETAILED_LOG_FILE"
+        echo "$IP" | tee -a "$LOG_FILE"
 
     else
-        echo "$(date) | IP $IP skipped (all FAIL)" | tee -a "$LOG_FILE"
+        echo "$(date) | IP $IP skipped (all FAIL)" | tee -a "$DETAILED_LOG_FILE"
+        echo "$(date) | IP $IP skipped (all FAIL)"
     fi
 
     # kill MDV (very important fix)
